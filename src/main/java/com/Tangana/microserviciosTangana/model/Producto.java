@@ -1,8 +1,12 @@
 package com.Tangana.microserviciosTangana.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.util.List;
+
+
 
 @Entity
 @Data // Lombok genera automáticamente los Getters, Setters y Constructores
@@ -12,7 +16,8 @@ public class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // El ID se autogenera (1, 2, 3...)
     private Long id;
-
+    @NotBlank
+    @NotNull
     private String name;       // Coincide con tu frontend
     private Integer price;     // Usamos Integer porque en tu JS eran enteros
     private String category;

@@ -2,7 +2,10 @@ package com.Tangana.microserviciosTangana.controller;
 
 import com.Tangana.microserviciosTangana.model.Producto;
 // 1. Importamos el SERVICIO en lugar del Repositorio
-import com.Tangana.microserviciosTangana.service.ProductoService; 
+import com.Tangana.microserviciosTangana.service.ProductoService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus; // <-- Importamos HttpStatus
 import org.springframework.http.ResponseEntity;
@@ -44,17 +47,17 @@ public class ProductoController {
         return ResponseEntity.ok(service.findByCategory(categoryName));
     }
 
-    // --- ENDPOINTS DE ESCRITURA (con manejo de errores) ---
 
     @PostMapping
-    public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
-        // 3. Usamos el patrón try...catch del 'demo'
+    public ResponseEntity<?> crearProducto(@Valid @RequestBody Producto producto) { 
+
         try {
             Producto nuevo = service.create(producto);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
+
     }
 
     @PostMapping("/batch")
@@ -70,8 +73,9 @@ public class ProductoController {
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarProducto(
             @PathVariable Long id, 
-            @RequestBody Producto productoDetalles) {
-        // 4. Manejo de errores más específico para PUT
+            @Valid @RequestBody Producto productoDetalles) { 
+        
+        
         try {
             Producto actualizado = service.update(id, productoDetalles);
             return ResponseEntity.ok(actualizado);

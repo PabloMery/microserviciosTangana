@@ -1,93 +1,95 @@
 package com.Tangana.microserviciosTangana.controller;
 
 import com.Tangana.microserviciosTangana.model.Producto;
-import com.Tangana.microserviciosTangana.repository.ProductoRepository;
+// 1. Importamos el SERVICIO en lugar del Repositorio
+import com.Tangana.microserviciosTangana.service.ProductoService; 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus; // <-- Importamos HttpStatus
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional; // <-- Importamos Optional
 
 @RestController
 @RequestMapping("/api/productos")
-// Esto permite que tu React (en el puerto 5173) consuma esta API sin bloqueos
-@CrossOrigin(origins = "http://localhost:5173") 
+@CrossOrigin(origins = "http://localhost:5173")
 public class ProductoController {
 
+    // 2. Inyectamos el SERVICIO
     @Autowired
-    private ProductoRepository productoRepository;
+    private ProductoService service;
 
-    // 1. Obtener todos los productos
-    // GET http://localhost:8080/api/productos
+    // --- ENDPOINTS DE LECTURA ---
+    
     @GetMapping
     public List<Producto> obtenerTodos() {
-        return productoRepository.findAll();
+        return service.findAll();
     }
 
-    // 2. Obtener un producto por ID (para la vista de detalle)
-    // GET http://localhost:8080/api/productos/1
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> obtenerPorId(@PathVariable Long id) {
-        return productoRepository.findById(id)
-                .map(producto -> ResponseEntity.ok(producto))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
+        // La lógica de "Optional" se queda aquí, como en el 'demo'
+        Optional<Producto> opt = service.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado con ID: " + id);
+        }
+        return ResponseEntity.ok(opt.get());
     }
+
     @GetMapping("/buscar")
     public ResponseEntity<List<Producto>> buscarPorCategoria(
             @RequestParam(name = "categoria") String categoryName) {
-        
-        // Llamamos al nuevo método que creamos en el repositorio
-        List<Producto> productos = productoRepository.findByCategory(categoryName);
-        
-        return ResponseEntity.ok(productos);
+        // Este endpoint sigue siendo simple
+        return ResponseEntity.ok(service.findByCategory(categoryName));
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
-        return productoRepository.findById(id)
-                .map(producto -> {
-                    productoRepository.delete(producto);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-    // 3. Crear un producto nuevo (útil para poblar la base de datos desde Postman)
-    // POST http://localhost:8080/api/productos
+
+    // --- ENDPOINTS DE ESCRITURA (con manejo de errores) ---
+
     @PostMapping
-    public Producto crearProducto(@RequestBody Producto producto) {
-        return productoRepository.save(producto);
+    public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
+        // 3. Usamos el patrón try...catch del 'demo'
+        try {
+            Producto nuevo = service.create(producto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
-    @PostMapping("/batch") // Lo ponemos en una ruta diferente: /api/productos/batch
-    public List<Producto> crearMultiplesProductos(@RequestBody List<Producto> productos) {
-        // JpaRepository tiene un método saveAll() perfecto para esto
-        return productoRepository.saveAll(productos); 
+
+    @PostMapping("/batch")
+    public ResponseEntity<?> crearMultiplesProductos(@RequestBody List<Producto> productos) {
+        try {
+            List<Producto> nuevos = service.createBatch(productos);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevos);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Producto> actualizarProducto(
+    public ResponseEntity<?> actualizarProducto(
             @PathVariable Long id, 
             @RequestBody Producto productoDetalles) {
+        // 4. Manejo de errores más específico para PUT
+        try {
+            Producto actualizado = service.update(id, productoDetalles);
+            return ResponseEntity.ok(actualizado);
+        } catch (IllegalArgumentException ex) {
+            if (ex.getMessage().contains("no encontrado")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            }
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
 
-        // 1. Buscamos el producto en la BD por su ID
-        return productoRepository.findById(id)
-            .map(productoExistente -> {
-                
-                // 2. Si existe, actualizamos todos sus campos
-                //    con los datos que vienen en el "body" (productoDetalles)
-                productoExistente.setName(productoDetalles.getName());
-                productoExistente.setPrice(productoDetalles.getPrice());
-                productoExistente.setCategory(productoDetalles.getCategory());
-                productoExistente.setStock(productoDetalles.getStock());
-                productoExistente.setImages(productoDetalles.getImages());
-
-                // 3. Guardamos los cambios en la BD.
-                //    Como 'productoExistente' ya tiene un ID, JPA sabe
-                //    que debe hacer un UPDATE y no un INSERT.
-                Producto productoActualizado = productoRepository.save(productoExistente);
-                
-                // 4. Devolvemos el producto actualizado
-                return ResponseEntity.ok(productoActualizado);
-
-            })
-            // 5. Si findById no encuentra nada, devolvemos un 404 Not Found
-            .orElse(ResponseEntity.notFound().build());
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarProducto(@PathVariable Long id) {
+        try {
+            service.deleteById(id);
+            return ResponseEntity.ok("Producto eliminado correctamente");
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 }

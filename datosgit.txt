@@ -1,0 +1,2 @@
+git config --global user.name "Apodo"
+git config --global user.email "Correo git"

@@ -20,7 +20,7 @@ public class Carrito {
     private Long id;
 
     @Column(nullable = false)
-    private String userId;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

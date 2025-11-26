@@ -2,65 +2,77 @@ package com.Tangana.microserviciosTangana.Controller;
 
 import com.Tangana.microserviciosTangana.DTO.CarritoDTO;
 import com.Tangana.microserviciosTangana.DTO.CartItemRequest;
-import com.Tangana.microserviciosTangana.DTO.UpdateItemRequest;
 import com.Tangana.microserviciosTangana.Service.CartService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/carrito")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/cart")   // 👈 ESTE es el path base
 public class CartController {
-    
-    @Autowired
-    private CartService cartService;
 
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    // GET /api/cart
     @GetMapping
-    public ResponseEntity<?> getCart(@RequestHeader("X-User-Id") Long userId) {
-        if (userId == null) return ResponseEntity.badRequest().body("Falta X-User-Id");
-        return ResponseEntity.ok(cartService.getOrCreateOpenCart(userId));
+    public ResponseEntity<CarritoDTO> getCart(
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        CarritoDTO dto = cartService.getOrCreateOpenCart(userId);
+        return ResponseEntity.ok(dto);
     }
 
+    // POST /api/cart/items
     @PostMapping("/items")
-    public ResponseEntity<?> addItem(
+    public ResponseEntity<CarritoDTO> addItem(
             @RequestHeader("X-User-Id") Long userId,
-            @RequestBody CartItemRequest req
+            @RequestBody CartItemRequest request
     ) {
-        return ResponseEntity.ok(cartService.addItem(userId, req.getProductId(), req.getQuantity()));
+        CarritoDTO dto = cartService.addItem(userId, request.getProductId(), request.getQuantity());
+        return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/items/{productId}")
-    public ResponseEntity<?> updateItem(
+    // PUT /api/cart/items
+    @PutMapping("/items")
+    public ResponseEntity<CarritoDTO> updateItem(
             @RequestHeader("X-User-Id") Long userId,
-            @PathVariable Long productId,
-            @RequestBody UpdateItemRequest req
+            @RequestBody CartItemRequest request
     ) {
-        return ResponseEntity.ok(cartService.updateItem(userId, productId, req.getQuantity()));
+        CarritoDTO dto = cartService.updateItem(userId, request.getProductId(), request.getQuantity());
+        return ResponseEntity.ok(dto);
     }
 
+    // DELETE /api/cart/items/{productId}
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<?> removeItem(
+    public ResponseEntity<CarritoDTO> removeItem(
             @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long productId
     ) {
-        return ResponseEntity.ok(cartService.removeItem(userId, productId));
+        CarritoDTO dto = cartService.removeItem(userId, productId);
+        return ResponseEntity.ok(dto);
     }
 
+    // DELETE /api/cart
     @DeleteMapping
-    public ResponseEntity<?> clearCart(@RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.ok(cartService.clearCart(userId));
+    public ResponseEntity<CarritoDTO> clearCart(
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        CarritoDTO dto = cartService.clearCart(userId);
+        return ResponseEntity.ok(dto);
     }
 
+    // POST /api/cart/merge
     @PostMapping("/merge")
-    public ResponseEntity<?> mergeCart(
+    public ResponseEntity<CarritoDTO> mergeCart(
             @RequestHeader("X-User-Id") Long userId,
             @RequestBody List<CartItemRequest> items
     ) {
-        return ResponseEntity.ok(cartService.mergeCart(userId, items));
+        CarritoDTO dto = cartService.mergeCart(userId, items);
+        return ResponseEntity.ok(dto);
     }
 }

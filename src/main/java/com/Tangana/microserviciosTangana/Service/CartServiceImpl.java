@@ -27,7 +27,7 @@ public class CartServiceImpl implements CartService {
     // ==========================
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CarritoDTO getOrCreateOpenCart(Long userId) {
         Carrito carrito = findOrCreateOpenCart(userId);
         return toDto(carrito);
@@ -50,7 +50,7 @@ public class CartServiceImpl implements CartService {
         if (item == null) {
             if (quantity > 0) {
                 CartItem newItem = new CartItem();
-                newItem.setCart(carrito);
+                newItem.setCarrito(carrito);
                 newItem.setProductId(productId);
                 newItem.setQuantity(quantity);
                 carrito.getItems().add(newItem);
@@ -85,7 +85,7 @@ public class CartServiceImpl implements CartService {
             }
             // Crear nuevo item con la cantidad exacta
             CartItem newItem = new CartItem();
-            newItem.setCart(carrito);
+            newItem.setCarrito(carrito);
             newItem.setProductId(productId);
             newItem.setQuantity(quantity);
             carrito.getItems().add(newItem);
@@ -149,7 +149,7 @@ public class CartServiceImpl implements CartService {
             if (item == null) {
                 // Si no existe, lo agregamos con la cantidad que viene del cliente
                 CartItem newItem = new CartItem();
-                newItem.setCart(carrito);
+                newItem.setCarrito(carrito);
                 newItem.setProductId(productId);
                 newItem.setQuantity(quantity);
                 carrito.getItems().add(newItem);

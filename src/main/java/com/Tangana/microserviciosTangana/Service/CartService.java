@@ -1,64 +1,21 @@
 package com.Tangana.microserviciosTangana.Service;
 
-import com.Tangana.microserviciosTangana.Model.Carrito;
-import com.Tangana.microserviciosTangana.Model.CartItem;
-import com.Tangana.microserviciosTangana.Repository.CartRepository;
+import com.Tangana.microserviciosTangana.DTO.CarritoDTO;
+import com.Tangana.microserviciosTangana.DTO.CartItemRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.List;
 
-import java.util.UUID;
+public interface CartService {
 
-@Service
-public class CartService {
+    CarritoDTO getOrCreateOpenCart(Long userId);
 
-    @Autowired
-    private CartRepository cartRepository;
+    CarritoDTO addItem(Long userId, Long productId, int quantity);
 
-    public Carrito getCart(String userId, String cartToken) {
+    CarritoDTO updateItem(Long userId, Long productId, int quantity);
 
-        if (userId != null && !userId.isEmpty()) {
-            return cartRepository.findByUserId(userId)
-                    .orElseGet(() -> cartRepository.save(
-                            new Carrito(null, userId, null, new java.util.ArrayList<>())
-                    ));
-        }
+    CarritoDTO removeItem(Long userId, Long productId);
 
-        if (cartToken != null && !cartToken.isEmpty()) {
-            return cartRepository.findByCartToken(cartToken)
-                    .orElseGet(() -> cartRepository.save(
-                            new Carrito(null, null, cartToken, new java.util.ArrayList<>())
-                    ));
-        }
+    CarritoDTO clearCart(Long userId);
 
-        // caso raro
-        String generated = UUID.randomUUID().toString();
-        return cartRepository.save(
-                new Carrito(null, null, generated, new java.util.ArrayList<>())
-        );
-    }
-
-    public Carrito addItem(Carrito cart, String productId, int quantity) {
-
-        boolean exists = false;
-
-        for (CartItem item : cart.getItems()) {
-            if (item.getProductId().equals(productId)) {
-                item.setQuantity(item.getQuantity() + quantity);
-                exists = true;
-                break;
-            }
-        }
-
-        if (!exists) {
-            cart.getItems().add(new CartItem(null, productId, quantity));
-        }
-
-        return cartRepository.save(cart);
-    }
-
-    public void clearCart(Carrito cart) {
-        cart.getItems().clear();
-        cartRepository.save(cart);
-    }
+    CarritoDTO mergeCart(Long userId, List<CartItemRequest> itemsFromClient);
 }

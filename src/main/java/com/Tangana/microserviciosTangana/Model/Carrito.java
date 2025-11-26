@@ -1,4 +1,5 @@
 package com.Tangana.microserviciosTangana.Model;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,24 +9,45 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name="cart")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name="carts")
 public class Carrito {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String userId;
 
-    @Column(nullable = true, unique = true)
-    private String cartToken;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private CarritoStats status = CarritoStats.OPEN;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true) 
-    @JoinColumn(name = "cart_id")
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @OneToMany(
+            mappedBy = "carrito",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
     private List<CartItem> items = new ArrayList<>();
 
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

@@ -5,9 +5,16 @@ import com.Tangana.microserviciosTangana.DTO.CartItemRequest;
 import com.Tangana.microserviciosTangana.Service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
-
+@CrossOrigin(
+    origins = "http://localhost:5173",      // tu frontend Vite
+    allowedHeaders = "*",                   // incluye X-User-Id
+    methods = { RequestMethod.GET, RequestMethod.POST,
+                RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS }
+)
 @RestController
 @RequestMapping("/api/cart")   // 👈 ESTE es el path base
 public class CartController {

@@ -16,7 +16,7 @@ import java.util.Optional; // <-- Importamos Optional
 
 @RestController
 @RequestMapping("/api/productos")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class ProductoController {
 
     // 2. Inyectamos el SERVICIO

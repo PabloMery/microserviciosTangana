@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @Entity
-@Data // Lombok genera automáticamente los Getters, Setters y Constructores
+@Data 
 @Table(name = "productos")
 public class Producto {
 
@@ -39,8 +39,7 @@ public class Producto {
     @Column(nullable = false)
     private Integer stock;
 
-    // Para guardar la lista de URLs de imágenes (["img1.jpg", "img2.jpg"])
-    // JPA creará una tabla secundaria llamada 'producto_images' para esto.
+
     @ElementCollection
     @CollectionTable(name = "producto_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")

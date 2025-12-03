@@ -11,10 +11,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Desactivamos CSRF porque vamos a usar la API desde Postman/React
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Permitimos acceso TOTAL a cualquier ruta que empiece con /api/
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             );

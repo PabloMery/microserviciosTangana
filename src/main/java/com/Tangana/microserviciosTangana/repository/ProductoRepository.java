@@ -8,6 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
-    // Aquí puedes agregar métodos personalizados si los necesitas, por ejemplo:
     List<Producto> findByCategory(String category);
 }

@@ -1,29 +1,26 @@
 package com.Tangana.microserviciosTangana.controller;
 
 import com.Tangana.microserviciosTangana.model.Producto;
-// 1. Importamos el SERVICIO en lugar del Repositorio
 import com.Tangana.microserviciosTangana.service.ProductoService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus; // <-- Importamos HttpStatus
+import org.springframework.http.HttpStatus; 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional; // <-- Importamos Optional
+import java.util.Optional; 
 
 @RestController
 @RequestMapping("/api/productos")
 @CrossOrigin(origins = "*")
 public class ProductoController {
 
-    // 2. Inyectamos el SERVICIO
     @Autowired
     private ProductoService service;
 
-    // --- ENDPOINTS DE LECTURA ---
     
     @GetMapping
     public List<Producto> obtenerTodos() {
@@ -32,7 +29,6 @@ public class ProductoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
-        // La lógica de "Optional" se queda aquí, como en el 'demo'
         Optional<Producto> opt = service.findById(id);
         if (opt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado con ID: " + id);
@@ -43,7 +39,6 @@ public class ProductoController {
     @GetMapping("/buscar")
     public ResponseEntity<List<Producto>> buscarPorCategoria(
             @RequestParam(name = "categoria") String categoryName) {
-        // Este endpoint sigue siendo simple
         return ResponseEntity.ok(service.findByCategory(categoryName));
     }
 
